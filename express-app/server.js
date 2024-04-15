@@ -1,20 +1,11 @@
-const express = require('express');
+var express = require('express');
+var path = require('path');
+var cookieParser = require('cookie-parser');
+var logger = require('morgan');
+var cors = require('cors');
+require('dotenv').config();
+const uri = process.env.MONGODB_URI; // Use environment variable for MongoDB Atlas URI
 const mongoose = require('mongoose');
-const createReview = require('./controllers/createReview');
-const getAllReviews = require('./controllers/getAllReviews');
-const updateReview = require('./controllers/updateReview');
-const deleteReview = require('./controllers/deleteReview');
-const createContact = require('./controllers/createContact');
-const getAllContacts = require('./controllers/getAllContacts');
-const updateContact = require('./controllers/updateContact');
-const deleteContact = require('./controllers/deleteContact');
-const Review = require('./models/Review');
-const Contact = require('./models/Contact');
-
-const app = express();
-const port = 3000;
-const uri = "mongodb+srv://rahman13:ZLA4kOhM3eczIGEH@mongodb.12spgep.mongodb.net/?retryWrites=true&w=majority&appName=mongoDB";
-
 const clientOptions = { serverApi: { version: '1', strict: true, deprecationErrors: false } };
 
 // Establish Mongoose Connection
@@ -27,117 +18,28 @@ mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
   });
 
 
+var contactRouter = require('./routes/Contacts');
+var reviewRouter = require('./routes/Reviews');
+var userRouter = require('./routes/User')
+var app = express();
+
+app.use(logger('dev'));
 app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, 'public')));
 
-// Routes for reviews
-app.post('/reviews', async (req, res) => {
-  const { restaurantName, rating, reviewText, reviewerName } = req.body;
-  try {
-    const newReview = await createReview(restaurantName, rating, reviewText, reviewerName);
-    res.status(201).json(newReview);
-  } catch (err) {
-    console.error('Error creating review', err);
-    res.status(500).send('Internal Server Error');
-  }
-});
+// CORS configuration
+const corsOptions = {
+    origin: process.env.REACT_URI, // Allow only requests from localhost:3000
+    optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+};
+app.use(cors(corsOptions))
 
-app.get('/reviews', async (req, res) => {
-  try {
-    const reviews = await getAllReviews();
-    res.json(reviews);
-  } catch (err) {
-    console.error('Error getting reviews', err);
-    res.status(500).send('Internal Server Error');
-  }
-});
-
-app.put('/reviews/:id', async (req, res) => {
-  const id = req.params.id;
-  const { restaurantName, rating, reviewText, reviewerName } = req.body;
-  try {
-    const updatedReview = await updateReview(id, restaurantName, rating, reviewText, reviewerName);
-    if (!updatedReview) {
-      res.status(404).send('Review not found');
-    } else {
-      res.json(updatedReview);
-    }
-  } catch (err) {
-    console.error('Error updating review', err);
-    res.status(500).send('Internal Server Error');
-  }
-});
-
-app.delete('/reviews/:id', async (req, res) => {
-  const id = req.params.id;
-  try {
-    const deletedReview = await deleteReview(id);
-    if (!deletedReview) {
-      res.status(404).send('Review not found');
-    } else {
-      res.json(deletedReview);
-    }
-  } catch (err) {
-    console.error('Error deleting review', err);
-    res.status(500).send('Internal Server Error');
-  }
-});
-
-// Routes for contacts
-app.post('/contacts', async (req, res) => {
-  const { name, email, subject, message } = req.body;
-  try {
-    const newContact = await createContact(name, email, subject, message);
-    res.status(201).json(newContact);
-  } catch (err) {
-    console.error('Error creating contact', err);
-    res.status(500).send('Internal Server Error');
-  }
-});
-
-app.get('/contacts', async (req, res) => {
-  try {
-    const contacts = await getAllContacts();
-    res.json(contacts);
-  } catch (err) {
-    console.error('Error getting contacts', err);
-    res.status(500).send('Internal Server Error');
-  }
-});
-
-app.put('/contacts/:id', async (req, res) => {
-  const id = req.params.id;
-  const { name, email, subject, message } = req.body;
-  try {
-    const updatedContact = await updateContact(id, name, email, subject, message);
-    if (!updatedContact) {
-      res.status(404).send('Contact not found');
-    } else {
-      res.json(updatedContact);
-    }
-  } catch (err) {
-    console.error('Error updating contact', err);
-    res.status(500).send('Internal Server Error');
-  }
-});
-
-app.delete('/contacts/:id', async (req, res) => {
-  const id = req.params.id;
-  try {
-    const deletedContact = await deleteContact(id);
-    if (!deletedContact) {
-      res.status(404).send('Contact not found');
-    } else {
-      res.json(deletedContact);
-    }
-  } catch (err) {
-    console.error('Error deleting contact', err);
-    res.status(500).send('Internal Server Error');
-  }
-});
-
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
-});
+//app.use('/', indexRouter);
+app.use('/api/Contacts', contactRouter);
+app.use('/api/Reviews', reviewRouter);
+app.use('/api/User', userRouter);
 
 module.exports = app;
 

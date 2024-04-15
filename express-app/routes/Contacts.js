@@ -1,11 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const {
-  createContact,
-  getAllContacts,
-  updateContact,
-  deleteContact
-} = require('../controllers');
+const createContact = require('../controllers/createContact');
+const getAllContacts = require('../controllers/getAllContacts');
+const updateContact = require('../controllers/updateContact');
+const deleteContact = require('../controllers/deleteContact');
 
 // Route to create a new contact
 router.post('/', async (req, res) => {

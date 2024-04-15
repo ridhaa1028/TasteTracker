@@ -1,11 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const {
-  createReview,
-  getAllReviews,
-  updateReview,
-  deleteReview
-} = require('../controllers');
+const createReview = require('../controllers/createReview');
+const getAllReviews = require('../controllers/getAllReviews');
+const updateReview = require('../controllers/updateReview');
+const deleteReview = require('../controllers/deleteReview');
 
 // Route to create a new review
 router.post('/', async (req, res) => {
