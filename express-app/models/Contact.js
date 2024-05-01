@@ -22,3 +22,5 @@ const contactSchema = new mongoose.Schema({
 
 // Create a model based on the schema
 const Contact = mongoose.model('Contact', contactSchema);
+
+module.exports = Contact;

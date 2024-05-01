@@ -7,9 +7,9 @@ const deleteReview = require('../controllers/deleteReview');
 
 // Route to create a new review
 router.post('/', async (req, res) => {
-  const { restaurantName, date, reviewText, rating } = req.body;
+  const { restaurantName, reviewText, rating, reviewer } = req.body;
   try {
-    const newReview = await createReview(restaurantName, date, reviewText, rating);
+    const newReview = await createReview(restaurantName, rating, reviewText, reviewer);
     res.status(201).json(newReview);
   } catch (err) {
     console.error('Error creating review', err);

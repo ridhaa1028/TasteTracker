@@ -13,7 +13,7 @@ const registerUser = async (username, email, password) => {
     // Create a new user
     const newUser = new User({ username, email, password });
     // Hash the password
-    newUser.password = await bcrypt.hash(password, 8);
+    //newUser.password = await bcrypt.hash(password, 8);
     await newUser.save();
 
     return { message: 'User created successfully' };
@@ -40,11 +40,12 @@ const loginUser = async (email, password) => {
     // Generate a JWT token
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-    return { token };
+    return { token, username: user.username, email: user.email }; // Include username and email in the response
   } catch (err) {
     console.error('Error logging in user', err);
     throw err;
   }
 };
+
 
 module.exports = { registerUser, loginUser };

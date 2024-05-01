@@ -1,30 +1,37 @@
 const express = require('express');
 const router = express.Router();
-const registerUser = require('../controllers/usersManagement');
-const loginUser = require('../controllers/usersManagement');
+const { registerUser, loginUser } = require('../controllers/usersManagement');
 
-// Route to register a new user
+// POST /api/users/register - Register a new user
 router.post('/register', async (req, res) => {
-  const { username, email, password } = req.body;
   try {
+    const { username, email, password } = req.body;
+
+    console.log("register route password: " + password)
     const result = await registerUser(username, email, password);
     res.status(201).json(result);
-  } catch (err) {
-    console.error('Error creating user', err);
-    res.status(500).json({ message: 'Internal Server Error' });
+  } catch (error) {
+    console.error('Registration error:', error.message);
+    res.status(400).json({ message: error.message });
   }
 });
 
-// Route to login a user
+// POST /api/users/login - Login an existing user
 router.post('/login', async (req, res) => {
-  const { email, password } = req.body;
   try {
+    const { email, password } = req.body;
+
     const result = await loginUser(email, password);
-    res.status(200).json(result);
-  } catch (err) {
-    console.error('Error logging in user', err);
-    res.status(500).json({ message: 'Internal Server Error' });
+    if (result.token) {
+      res.json(result); // Send token, username, and email to the client
+    } else {
+      throw new Error('Authentication failed, no token provided');
+    }
+  } catch (error) {
+    console.error('Login error:', error.message);
+    res.status(401).json({ message: error.message });
   }
 });
+
 
 module.exports = router;
